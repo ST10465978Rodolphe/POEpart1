@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.chatapp.LoginTest" time="0.094" tests="10" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.chatapp.MessageTest" time="12.204" tests="8" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -59,14 +59,12 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testValidPassword" classname="com.chatapp.LoginTest" time="0.009"/>
-  <testcase name="testInvalidCellNumber" classname="com.chatapp.LoginTest" time="0.0"/>
-  <testcase name="testInvalidUsername" classname="com.chatapp.LoginTest" time="0.001"/>
-  <testcase name="testFailedLogin" classname="com.chatapp.LoginTest" time="0.0"/>
-  <testcase name="testInvalidPassword" classname="com.chatapp.LoginTest" time="0.0"/>
-  <testcase name="testReturnLoginStatusSuccess" classname="com.chatapp.LoginTest" time="0.009"/>
-  <testcase name="testValidCellNumber" classname="com.chatapp.LoginTest" time="0.0"/>
-  <testcase name="testReturnLoginStatusFail" classname="com.chatapp.LoginTest" time="0.0"/>
-  <testcase name="testSuccessfulLogin" classname="com.chatapp.LoginTest" time="0.001"/>
-  <testcase name="testValidUsername" classname="com.chatapp.LoginTest" time="0.001"/>
+  <testcase name="testValidMessageIDLength" classname="com.chatapp.MessageTest" time="0.0"/>
+  <testcase name="testInvalidRecipientCell" classname="com.chatapp.MessageTest" time="0.0"/>
+  <testcase name="testTotalMessagesAfterSend" classname="com.chatapp.MessageTest" time="7.469"/>
+  <testcase name="testSendMessageReturnsValidResponse" classname="com.chatapp.MessageTest" time="4.727"/>
+  <testcase name="testValidRecipientCell" classname="com.chatapp.MessageTest" time="0.0"/>
+  <testcase name="testMessageContentOverLimit" classname="com.chatapp.MessageTest" time="0.0"/>
+  <testcase name="testMessageHashFormat" classname="com.chatapp.MessageTest" time="0.0"/>
+  <testcase name="testMessageContentUnderLimit" classname="com.chatapp.MessageTest" time="0.0"/>
 </testsuite>

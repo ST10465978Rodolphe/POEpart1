@@ -62,6 +62,9 @@ public class ChatApp {
 
                     Message message = new Message(recipient, content);
 
+                    // This method to store data in JSON format was written with the guidance of ChatGPT, an AI model by OpenAI (2025).
+                    // Reference: OpenAI. (2025). ChatGPT (May 2025 version) [Large language model]. https://chat.openai.com/
+
                     if (!message.checkRecipientCell()) {
                         JOptionPane.showMessageDialog(null, "Invalid recipient phone number format.");
                         continue;

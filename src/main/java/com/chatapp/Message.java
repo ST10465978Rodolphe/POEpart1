@@ -114,3 +114,5 @@ public class Message {
         return messageCount;
     }
 }
+// This logic was created and refined with the assistance of ChatGPT, an AI language model by OpenAI (2025).
+// Reference: OpenAI. (2025). ChatGPT (May 2025 version) [Large language model]. https://chat.openai.com/

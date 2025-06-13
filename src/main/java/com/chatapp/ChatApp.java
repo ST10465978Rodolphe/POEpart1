@@ -10,11 +10,11 @@ package com.chatapp;
  * @author RC_Student_lab
  */
 import javax.swing.JOptionPane;
+import java.util.List;
 
 public class ChatApp {
 
     public static void main(String[] args) {
-        // Step 1: Registration
         String firstName = JOptionPane.showInputDialog("Enter your first name:");
         String lastName = JOptionPane.showInputDialog("Enter your last name:");
         String username = JOptionPane.showInputDialog("Enter a username (max 5 characters and must include '_'):");
@@ -24,15 +24,14 @@ public class ChatApp {
         Login user = new Login(username, password, cellNumber, firstName, lastName);
         JOptionPane.showMessageDialog(null, user.registerUser());
 
-        // Step 2: Login
         String loginUser = JOptionPane.showInputDialog("Login\nEnter your username:");
         String loginPass = JOptionPane.showInputDialog("Enter your password:");
-
         boolean isLoggedIn = user.loginUser(loginUser, loginPass);
+
         JOptionPane.showMessageDialog(null, user.returnLoginStatus(isLoggedIn));
 
-        // Step 3: Menu if logged in
         if (isLoggedIn) {
+            Message.loadStoredMessagesFromJson();
             JOptionPane.showMessageDialog(null, "Welcome to QuickChat!");
 
             int totalMessagesToSend = Integer.parseInt(JOptionPane.showInputDialog("How many messages do you want to send?"));
@@ -40,59 +39,85 @@ public class ChatApp {
 
             while (true) {
                 String menu = """
-                        Please select an option:
-                        1 - Send Message
-                        2 - Show recently sent messages
-                        3 - Quit""";
+                    Please select an option:
+                    1 - Send Message
+                    2 - Show sent messages report
+                    3 - Show longest message
+                    4 - Search by message ID
+                    5 - Search by recipient
+                    6 - Delete message by hash
+                    7 - Quit""";
+
                 String choice = JOptionPane.showInputDialog(menu);
 
-                if (choice.equals("1")) {
-                    if (messagesEntered >= totalMessagesToSend) {
-                        JOptionPane.showMessageDialog(null, "You have reached the message limit.");
-                        continue;
+                switch (choice) {
+                    case "1" -> {
+                        if (messagesEntered >= totalMessagesToSend) {
+                            JOptionPane.showMessageDialog(null, "You have reached your message limit.");
+                            continue;
+                        }
+
+                        String recipient = JOptionPane.showInputDialog("Enter recipient number (+27 format):");
+                        String message = JOptionPane.showInputDialog("Enter your message (max 250 chars):");
+
+                        if (message.length() > 250) {
+                            JOptionPane.showMessageDialog(null, "Message exceeds 250 characters by " + (message.length() - 250));
+                            continue;
+                        }
+
+                        Message m = new Message(recipient, message);
+
+                        if (!m.checkRecipientCell()) {
+                            JOptionPane.showMessageDialog(null, "Invalid cell number format.");
+                            continue;
+                        }
+
+                        String result = m.sendMessage();
+                        JOptionPane.showMessageDialog(null, result);
+
+                        if (result.contains("sent")) {
+                            JOptionPane.showMessageDialog(null, "Message ID: " + m.getMessageID()
+                                    + "\nHash: " + m.getMessageHash()
+                                    + "\nTo: " + m.getRecipient()
+                                    + "\nMessage: " + m.getMessageContent());
+                            messagesEntered++;
+                        }
                     }
 
-                    String recipient = JOptionPane.showInputDialog("Enter recipient's phone number (+27 format):");
-                    String content = JOptionPane.showInputDialog("Enter your message (max 250 characters):");
+                    case "2" -> JOptionPane.showMessageDialog(null, Message.getReport());
 
-                    if (content.length() > 250) {
-                        JOptionPane.showMessageDialog(null, "Message exceeds 250 characters by " + (content.length() - 250) + ". Please reduce size.");
-                        continue;
+                    case "3" -> JOptionPane.showMessageDialog(null, "Longest message:\n" + Message.getLongestSentMessage());
+
+                    case "4" -> {
+                        String id = JOptionPane.showInputDialog("Enter Message ID:");
+                        Message found = Message.findById(id);
+                        JOptionPane.showMessageDialog(null,
+                                (found != null) ? "To: " + found.getRecipient() + "\n" + found.getMessageContent()
+                                                : "Message not found.");
                     }
 
-                    Message message = new Message(recipient, content);
-
-                    // This method to store data in JSON format was written with the guidance of ChatGPT, an AI model by OpenAI (2025).
-                    // Reference: OpenAI. (2025). ChatGPT (May 2025 version) [Large language model]. https://chat.openai.com/
-
-                    if (!message.checkRecipientCell()) {
-                        JOptionPane.showMessageDialog(null, "Invalid recipient phone number format.");
-                        continue;
+                    case "5" -> {
+                        String rec = JOptionPane.showInputDialog("Enter recipient number:");
+                        List<Message> messages = Message.findByRecipient(rec);
+                        StringBuilder sb = new StringBuilder();
+                        for (Message m : messages) {
+                            sb.append(m.getMessageContent()).append("\n");
+                        }
+                        JOptionPane.showMessageDialog(null, messages.isEmpty() ? "No messages found." : sb.toString());
                     }
 
-                    String result = message.sendMessage();
-                    JOptionPane.showMessageDialog(null, result);
-
-                    if (result.contains("sent")) {
-                        JOptionPane.showMessageDialog(null, """
-                                Message ID: %s
-                                Hash: %s
-                                To: %s
-                                Message: %s
-                                """.formatted(
-                                message.checkMessageID() ? message.createMessageHash() : "Invalid ID",
-                                message.createMessageHash(),
-                                recipient, content));
-                        messagesEntered++;
+                    case "6" -> {
+                        String hash = JOptionPane.showInputDialog("Enter message hash to delete:");
+                        boolean deleted = Message.deleteByHash(hash);
+                        JOptionPane.showMessageDialog(null, deleted ? "Message successfully deleted." : "No message found with that hash.");
                     }
 
-                } else if (choice.equals("2")) {
-                    JOptionPane.showMessageDialog(null, Message.printMessages());
-                } else if (choice.equals("3")) {
-                    JOptionPane.showMessageDialog(null, "You sent " + Message.returnTotalMessages() + " messages. Goodbye!");
-                    break;
-                } else {
-                    JOptionPane.showMessageDialog(null, "Invalid option.");
+                    case "7" -> {
+                        JOptionPane.showMessageDialog(null, "You sent " + Message.sentMessages.size() + " messages. Goodbye!");
+                        System.exit(0);
+                    }
+
+                    default -> JOptionPane.showMessageDialog(null, "Invalid option.");
                 }
             }
         }

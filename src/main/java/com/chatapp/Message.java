@@ -4,24 +4,26 @@
  */
 package com.chatapp;
 
-/**
- *
- * @author RC_Student_lab
- */
-
 import javax.swing.JOptionPane;
-import java.util.Random;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.io.FileWriter;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.stream.Collectors;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 public class Message {
 
     private static int messageCount = 0;
-    private static List<Message> sentMessages = new ArrayList<>();
+    public static List<Message> sentMessages = new ArrayList<>();
+    public static List<Message> disregardedMessages = new ArrayList<>();
+    public static List<Message> storedMessages = new ArrayList<>();
+
+    public static List<String> messageHashes = new ArrayList<>();
+    public static List<String> messageIDs = new ArrayList<>();
 
     private final String messageID;
     private final String recipient;
@@ -35,6 +37,9 @@ public class Message {
         this.messageContent = content;
         this.messageHash = createMessageHash();
         this.status = "Pending";
+
+        messageHashes.add(this.messageHash);
+        messageIDs.add(this.messageID);
     }
 
     private String generateMessageID() {
@@ -74,9 +79,11 @@ public class Message {
                 return "Message successfully sent.";
             case 1:
                 this.status = "Discarded";
+                disregardedMessages.add(this);
                 return "Message discarded.";
             case 2:
                 this.status = "Stored";
+                storedMessages.add(this);
                 storeMessage();
                 return "Message successfully stored.";
             default:
@@ -99,20 +106,89 @@ public class Message {
         }
     }
 
-    public static String printMessages() {
-        StringBuilder sb = new StringBuilder();
-        for (Message m : sentMessages) {
-            sb.append("Message ID: ").append(m.messageID).append("\n")
-              .append("Message Hash: ").append(m.messageHash).append("\n")
-              .append("Recipient: ").append(m.recipient).append("\n")
-              .append("Message: ").append(m.messageContent).append("\n\n");
+    public static void loadStoredMessagesFromJson() {
+        try (Scanner scanner = new Scanner(new FileReader("stored_messages.json"))) {
+            JSONParser parser = new JSONParser();
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                JSONObject json = (JSONObject) parser.parse(line);
+                String recipient = (String) json.get("Recipient");
+                String content = (String) json.get("Message");
+
+                Message m = new Message(recipient, content);
+                m.status = "Stored";
+                storedMessages.add(m);
+            }
+        } catch (IOException | ParseException e) {
+            JOptionPane.showMessageDialog(null, "Failed to load stored messages.");
         }
-        return sb.length() > 0 ? sb.toString() : "No messages sent yet.";
+    }
+// This JSON loading logic was developed with the assistance of ChatGPT, an AI model by OpenAI (2025).
+// Reference: OpenAI. (2025). ChatGPT (May 2025 version) [Large language model]. https://chat.openai.com/
+    
+    public static List<String> getSentContents() {
+        return sentMessages.stream()
+                .map(Message::getMessageContent)
+                .collect(Collectors.toList());
     }
 
-    public static int returnTotalMessages() {
-        return messageCount;
+    public static String getLongestSentMessage() {
+        return sentMessages.stream()
+                .max(Comparator.comparingInt(m -> m.getMessageContent().length()))
+                .map(Message::getMessageContent)
+                .orElse("No messages sent.");
+    }
+
+    public static Message findById(String id) {
+        return sentMessages.stream()
+                .filter(m -> m.getMessageID().equals(id))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public static List<Message> findByRecipient(String recipient) {
+        List<Message> results = new ArrayList<>();
+        for (Message m : sentMessages) {
+            if (m.getRecipient().equals(recipient)) {
+                results.add(m);
+            }
+        }
+        for (Message m : storedMessages) {
+            if (m.getRecipient().equals(recipient)) {
+                results.add(m);
+            }
+        }
+        return results;
+    }
+
+    public static boolean deleteByHash(String hash) {
+        return sentMessages.removeIf(m -> m.getMessageHash().equals(hash));
+    }
+
+    public static String getReport() {
+        StringBuilder sb = new StringBuilder("=== Sent Messages Report ===\n");
+        for (Message m : sentMessages) {
+            sb.append("Hash: ").append(m.getMessageHash()).append("\n")
+              .append("Recipient: ").append(m.getRecipient()).append("\n")
+              .append("Message: ").append(m.getMessageContent()).append("\n\n");
+        }
+        return sb.length() > 0 ? sb.toString() : "No messages to report.";
+    }
+
+    // Getters
+    public String getMessageContent() {
+        return messageContent;
+    }
+
+    public String getMessageID() {
+        return messageID;
+    }
+
+    public String getMessageHash() {
+        return messageHash;
+    }
+
+    public String getRecipient() {
+        return recipient;
     }
 }
-// This logic was created and refined with the assistance of ChatGPT, an AI language model by OpenAI (2025).
-// Reference: OpenAI. (2025). ChatGPT (May 2025 version) [Large language model]. https://chat.openai.com/

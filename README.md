@@ -34,5 +34,6 @@ This project demonstrates knowledge in:
 Some regular expressions and logic for JSON handling were developed with the assistance of **ChatGPT**, an AI language model created by OpenAI.
 
 ## 📚 References
+[1] J. Farrell, Java Programming, 9th ed. Boston, MA, USA: Cengage Learning, 2023.
 [1] OpenAI, "ChatGPT", https://chat.openai.com, Accessed: Jun. 13, 2025.
 
